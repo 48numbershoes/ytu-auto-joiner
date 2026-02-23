@@ -1,0 +1,27 @@
+# Login bilgileri iceren config (ASLA paylasma!)
+schedule.json
+
+# Bot'un kendi Chrome profili
+bot_chrome_profile/
+
+# Log ve debug dosyalari
+bot.log
+debug_*.png
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# Gecici scriptler
+inspect_login.py
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store

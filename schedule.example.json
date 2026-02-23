@@ -1,0 +1,36 @@
+{
+    "login": {
+        "email": "adiniz.soyadiniz@std.yildiz.edu.tr",
+        "sifre": "sifreniz"
+    },
+    "dersler": [
+        {
+            "ad": "Matematik 2",
+            "kod": "MAT1072",
+            "gun": "Pazartesi",
+            "saat": "09:00",
+            "aktif": true
+        },
+        {
+            "ad": "Ataturk Ilkeleri ve Inkilap Tarihi 2",
+            "kod": "ATA1032",
+            "gun": "Pazartesi",
+            "saat": "13:00",
+            "aktif": true
+        }
+    ],
+    "_yardim": {
+        "gun_secenekleri": [
+            "Pazartesi",
+            "Sali",
+            "Carsamba",
+            "Persembe",
+            "Cuma",
+            "Cumartesi",
+            "Pazar"
+        ],
+        "saat_formati": "SS:DD (24 saat formati)",
+        "aktif": "true = bot bu derse katilir, false = bu ders atlanir",
+        "kod": "Ders kodu (orn: MAT1072) - Etkinlik Akisi'nda dersi bulmak icin kullanilir"
+    }
+}

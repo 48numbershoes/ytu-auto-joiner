@@ -1,0 +1,5 @@
+selenium
+apscheduler
+webdriver-manager
+pyautogui>=0.9.54
+pygetwindow>=0.0.9
