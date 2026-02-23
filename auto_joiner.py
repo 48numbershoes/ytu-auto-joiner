@@ -372,6 +372,20 @@ def _join_zoom_from_browser(driver):
 
         log.info("[BASARILI] Zoom dersine tarayicidan katilim tamamlandi!")
 
+        # 6. "Got it" / "This meeting is being recorded" uyarısı varsa kapat
+        try:
+            recording_btn = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH,
+                    "//button[contains(text(), 'Got it')] | "
+                    "//button[contains(text(), 'Anladım')] | "
+                    "//button[contains(@class, 'zm-btn--primary')]"
+                ))
+            )
+            recording_btn.click()
+            log.info("[OK] 'Kayit uyarisi' (Got it) kapatildi.")
+        except TimeoutException:
+            pass
+
     except Exception as e:
         log.error(f"[HATA] Zoom katiliminda hata: {e}")
         try:
@@ -384,7 +398,7 @@ def _join_zoom_from_browser(driver):
 
 # ─── Derse Katılma ───────────────────────────────────────────────────────────
 
-def join_class(ders_adi: str, ders_kodu: str = ""):
+def join_class(ders_adi: str, ders_kodu: str = "", bitis_saat: str = None):
     """
     LMS'e gidip derse katılır.
 
@@ -582,15 +596,39 @@ def join_class(ders_adi: str, ders_kodu: str = ""):
     finally:
         if driver:
             if buton_bulundu:
-                # Zoom tarayicida acik — tarayiciyi KAPATMA, ders devam ediyor
-                log.info("Zoom tarayicida acik, tarayici acik kalacak.")
+                # Zoom tarayicida acik, bitis saatine kadar bekle
+                if bitis_saat:
+                    try:
+                        simdi = datetime.now()
+                        bitis_obj = datetime.strptime(bitis_saat, "%H:%M")
+                        bitis_vakti = simdi.replace(hour=bitis_obj.hour, minute=bitis_obj.minute, second=0, microsecond=0)
+                        
+                        # Eger bitis vakti gectiyse (gece dersi vb.), yarına atama yapma, sadece bekleme
+                        bekleme_suresi = (bitis_vakti - simdi).total_seconds()
+                        
+                        if bekleme_suresi > 0:
+                            log.info(f"Zoom tarayicida acik. Ders {bitis_saat}'de bitecek ({int(bekleme_suresi/60)} dk kaldi).")
+                            time.sleep(bekleme_suresi)
+                            log.info("Ders bitis saati geldi.")
+                        else:
+                            log.info(f"Ders bitis saati ({bitis_saat}) zaten gecmis veya su an.")
+                    except Exception as e:
+                        log.error(f"Bitis saati hesaplama hatasi: {e}")
+                        log.info("Otomatik kapanma devre disi, tarayici acik kalacak.")
+                        # Eski davranis: hic kapatma
+                        pass
+                else:
+                    log.info("Bitis saati belirtilmemis, tarayici acik kalacak.")
+                    return # Kapatmadan cik (detach modu devrede)
             else:
+                # Buton bulunamadiysa biraz bekle ve kapat
                 time.sleep(10)
-                try:
-                    driver.quit()
-                    log.info("Tarayici kapatildi.")
-                except Exception:
-                    pass
+
+            try:
+                driver.quit()
+                log.info("Tarayici kapatildi.")
+            except Exception:
+                pass
 
 
 # ─── Zamanlayıcı ─────────────────────────────────────────────────────────────
@@ -604,6 +642,8 @@ def setup_scheduler(dersler: list) -> BlockingScheduler:
         saat_str = ders["saat"]
         ad = ders["ad"]
         kod = ders.get("kod", "")
+
+        bitis = ders.get("bitis")
 
         cron_gun = GUN_MAP.get(gun)
         if not cron_gun:
@@ -629,7 +669,7 @@ def setup_scheduler(dersler: list) -> BlockingScheduler:
         scheduler.add_job(
             join_class,
             trigger=trigger,
-            args=[ad, kod],
+            args=[ad, kod, bitis],
             id=f"ders_{kod or ad.replace(' ', '_')}",
             name=f"{kod} {ad} ({gun} {saat_str})",
             misfire_grace_time=300,  # 5 dakika tolerans
@@ -706,7 +746,7 @@ def main():
             # Belirli bir ders kodu ile test et
             ders_bilgi = next((d for d in dersler if d.get("kod") == args.ders), None)
             if ders_bilgi:
-                join_class(ders_bilgi["ad"], ders_bilgi["kod"])
+                join_class(ders_bilgi["ad"], ders_bilgi["kod"], ders_bilgi.get("bitis"))
             else:
                 log.info(f"Ders kodu '{args.ders}' schedule.json'da bulunamadi, genel test yapiliyor...")
                 join_class("TEST DERS", args.ders)
