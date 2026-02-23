@@ -126,12 +126,23 @@ def load_schedule() -> list:
 
 def create_driver() -> webdriver.Chrome:
     """Bot'a ozel Chrome profili ile tarayici baslatir."""
+    # Profil kilidini cozmek icin eski surecleri temizle
+    try:
+        import subprocess
+        log.info("Eski Chrome surecleri temizleniyor...")
+        subprocess.run(["taskkill", "/F", "/IM", "chrome.exe", "/T"], capture_output=True)
+        subprocess.run(["taskkill", "/F", "/IM", "chromedriver.exe", "/T"], capture_output=True)
+        time.sleep(2)
+    except Exception:
+        pass
+
     log.info("Chrome tarayici baslatiliyor...")
 
     # Bot profil dizinini olustur
     BOT_PROFILE_DIR.mkdir(parents=True, exist_ok=True)
 
     options = Options()
+    options.add_experimental_option("detach", True)
 
     # Bot'un kendi profil dizinini kullan (kullanici Chrome'u ile cakismaz)
     options.add_argument(f"--user-data-dir={BOT_PROFILE_DIR}")
