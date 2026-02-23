@@ -555,16 +555,15 @@ def join_class(ders_adi: str, ders_kodu: str = ""):
     finally:
         if driver:
             if buton_bulundu:
-                # Zoom tarayicida acik, ders bitene kadar tarayiciyi kapat
-                log.info("Zoom tarayicida acik, tarayici 90 dakika sonra kapanacak.")
-                time.sleep(90 * 60)  # 90 dakika = tipik ders suresi
+                # Zoom tarayicida acik — tarayiciyi KAPATMA, ders devam ediyor
+                log.info("Zoom tarayicida acik, tarayici acik kalacak.")
             else:
                 time.sleep(10)
-            try:
-                driver.quit()
-                log.info("Tarayici kapatildi.")
-            except Exception:
-                pass
+                try:
+                    driver.quit()
+                    log.info("Tarayici kapatildi.")
+                except Exception:
+                    pass
 
 
 # ─── Zamanlayıcı ─────────────────────────────────────────────────────────────
