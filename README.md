@@ -1,24 +1,48 @@
-# 🎓 YTÜ Otomatik Derse Katılım Botu
+# YTU Auto Joiner 🎓
 
-Yıldız Teknik Üniversitesi online ders sistemine (`online.yildiz.edu.tr`) otomatik katılım sağlayan Python botu.
+YTÜ (Yıldız Teknik Üniversitesi) LMS üzerinden canlı derslere **otomatik katılım** botu.
 
-## 🚀 Kurulum
+## Ne Yapar?
+
+- ⏰ Ders programına göre otomatik olarak derslere katılır
+- 🔐 LMS'ye otomatik giriş yapar
+- 🖥️ Zoom'u **tarayıcıdan** açar (masaüstü uygulaması gerekmez)
+- 🔇 Mikrofon ve kamera **kapalı** olarak katılır
+- 📋 Tüm işlemleri loglar (`bot.log`)
+
+## Kurulum
+
+### 1. Gereksinimler
+
+- Python 3.10+
+- Google Chrome
+
+### 2. Bağımlılıkları Yükle
 
 ```bash
-# 1. Bağımlılıkları yükle
 pip install -r requirements.txt
-
-# 2. Ders programını düzenle
-# schedule.json dosyasını aç ve derslerini ekle
 ```
 
-## 📋 Ders Programı (schedule.json)
+### 3. Ders Programını Ayarla
+
+`schedule.example.json` dosyasını kopyala ve bilgilerini doldur:
+
+```bash
+copy schedule.example.json schedule.json
+```
+
+`schedule.json` içeriği:
 
 ```json
 {
+  "login": {
+    "email": "OGRENCI_NUMARASI@std.yildiz.edu.tr",
+    "sifre": "SIFREN"
+  },
   "dersler": [
     {
-      "ad": "Fizik II",
+      "ders_adi": "Matematik 2",
+      "ders_kodu": "MAT1072",
       "gun": "Pazartesi",
       "saat": "09:00",
       "aktif": true
@@ -27,38 +51,51 @@ pip install -r requirements.txt
 }
 ```
 
-- **aktif**: `true` → bot bu derse katılır, `false` → atlanır
-- **gun**: Pazartesi, Salı, Çarşamba, Perşembe, Cuma, Cumartesi, Pazar
-- **saat**: 24 saat formatı (ör: `"14:30"`)
+> ⚠️ `schedule.json` dosyası `.gitignore`'da — kişisel bilgilerin paylaşılmaz.
 
-## 🎮 Kullanım
+## Kullanım
+
+### Normal Mod (Zamanlayıcı)
 
 ```bash
-# Normal mod - zamanlayıcı başlar, ders saatinde otomatik katılır
 python auto_joiner.py
-
-# Test modu - hemen LMS'ye gidip "Derse Katıl" butonunu arar
-python auto_joiner.py --test
-
-# Aktif dersleri göster
-python auto_joiner.py --status
-
-# Farklı Chrome profili kullan
-python auto_joiner.py --profile "Profile 1"
 ```
 
-## ⚡ Önemli Notlar
+Bot ders saatlerini bekler ve zamanı gelince otomatik katılır.
 
-1. **Chrome kapalı olmalı** — Selenium çalışırken Chrome tarayıcısı kapalı olmalı
-2. **Zoom ayarı** — Zoom > Settings > Audio > ✅ "Mute my microphone when joining a meeting"
-3. **Oturum** — Chrome'da `online.yildiz.edu.tr`'ye daha önce giriş yapmış olmalısınız
-4. **Zamanlama** — Bot dersten **2 dakika önce** otomatik olarak katılır
+### Test Modu
 
-## 📁 Dosyalar
+Hemen bir derse katılmayı denemek için:
 
-| Dosya | Açıklama |
-|-------|----------|
-| `auto_joiner.py` | Ana otomasyon scripti |
-| `schedule.json` | Haftalık ders programı |
-| `bot.log` | Çalışma logları |
-| `requirements.txt` | Python bağımlılıkları |
+```bash
+python auto_joiner.py --test --ders MAT1072
+```
+
+## Nasıl Çalışır?
+
+```
+1. LMS'ye giriş yap
+2. Etkinlik Akışı → Ders kartını bul
+3. Canlı Ders → "Derse Katıl" butonuna tıkla
+4. Zoom URL'sini web client formatına dönüştür
+5. Mikrofon/kamera olmadan katıl
+6. Tarayıcıda 90dk açık kal
+```
+
+## Dosya Yapısı
+
+```
+├── auto_joiner.py          # Ana bot kodu
+├── schedule.json           # Ders programı + login (GİZLİ)
+├── schedule.example.json   # Örnek config
+├── requirements.txt        # Python bağımlılıkları
+├── .gitignore
+└── README.md
+```
+
+## Notlar
+
+- İlk çalıştırmada Chrome profili oluşturulur (`bot_chrome_profile/`)
+- Giriş yapıldıktan sonra oturum profilde kalır
+- Her ders için ayrı Chrome penceresi açılır
+- `bot.log` dosyasından tüm işlemleri takip edebilirsin
