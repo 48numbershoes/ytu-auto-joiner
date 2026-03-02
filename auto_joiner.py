@@ -383,11 +383,12 @@ def _join_zoom_from_browser(driver):
                 EC.element_to_be_clickable((By.XPATH,
                     "//button[contains(text(), 'Got it')] | "
                     "//button[contains(text(), 'Anladım')] | "
+                    "//button[contains(text(), 'Tamam')] | "
                     "//button[contains(@class, 'zm-btn--primary')]"
                 ))
             )
-            recording_btn.click()
-            log.info("[OK] 'Kayit uyarisi' (Got it) kapatildi.")
+            driver.execute_script("arguments[0].click();", recording_btn)
+            log.info("[OK] 'Kayit uyarisi' (Got it/Tamam) kapatildi.")
         except TimeoutException:
             pass
 
