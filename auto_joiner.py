@@ -354,18 +354,20 @@ def _join_zoom_from_browser(driver):
         except TimeoutException:
             log.info("Katil butonu bulunamadi, zaten katilim olmus olabilir.")
 
-        # 5. Modal tekrar gelirse kapat (kamera/mikrofon izni)
+        # 5. Modal tekrar gelirse kapat (Toplantiya girdikten sonra cikan asil ses/kamera secimi)
         try:
-            no_av_link2 = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH,
+            # Derse baglanmasi 10-15 saniye surebilir, o yuzden 20 saniye bekliyoruz.
+            no_av_link2 = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.XPATH,
                     "//*[contains(text(), 'Mikrofon ve kamera olmadan devam et')] | "
                     "//*[contains(text(), 'mikrofon ve kamera olmadan')] | "
                     "//*[contains(text(), 'without microphone')] | "
                     "//*[contains(text(), 'Join without')]"
                 ))
             )
-            no_av_link2.click()
-            log.info("[OK] Ikinci modal da kapatildi!")
+            # Sayfa yuklenirken overlay vs. olabilir diye dogrudan JS ile tikliyoruz.
+            driver.execute_script("arguments[0].click();", no_av_link2)
+            log.info("[OK] Ders-ici (3.) modal da kapatildi!")
             time.sleep(3)
         except TimeoutException:
             pass
