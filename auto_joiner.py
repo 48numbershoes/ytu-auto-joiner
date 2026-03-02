@@ -356,19 +356,22 @@ def _join_zoom_from_browser(driver):
 
         # 5. Modal tekrar gelirse kapat (Toplantiya girdikten sonra cikan asil ses/kamera secimi)
         try:
-            # Derse baglanmasi 10-15 saniye surebilir, o yuzden 20 saniye bekliyoruz.
-            no_av_link2 = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.XPATH,
-                    "//*[contains(text(), 'Mikrofon ve kamera olmadan devam et')] | "
-                    "//*[contains(text(), 'mikrofon ve kamera olmadan')] | "
-                    "//*[contains(text(), 'without microphone')] | "
-                    "//*[contains(text(), 'Join without')]"
-                ))
+            xpath_av = (
+                "//*[contains(text(), 'Mikrofon ve kamera olmadan devam et')] | "
+                "//*[contains(text(), 'mikrofon ve kamera olmadan')] | "
+                "//*[contains(text(), 'without microphone')] | "
+                "//*[contains(text(), 'Join without')]"
             )
-            # Sayfa yuklenirken overlay vs. olabilir diye dogrudan JS ile tikliyoruz.
-            driver.execute_script("arguments[0].click();", no_av_link2)
-            log.info("[OK] Ders-ici (3.) modal da kapatildi!")
-            time.sleep(3)
+            
+            # Gizli (onceki adimdan kalan) butona tiklamamak icin sadece 'is_displayed()' olanlari hedefliyoruz
+            visible_link = WebDriverWait(driver, 20).until(
+                lambda d: next((el for el in d.find_elements(By.XPATH, xpath_av) if el.is_displayed()), None)
+            )
+            
+            if visible_link:
+                driver.execute_script("arguments[0].click();", visible_link)
+                log.info("[OK] Ders-ici (3.) modal da kapatildi!")
+                time.sleep(3)
         except TimeoutException:
             pass
 
